@@ -9,16 +9,11 @@ export default defineUserConfig({
     logo: "/logo.png",
     author: "falser101",
     authorAvatar: "/head.png",
-    docsRepo: "https://github.com/vuepress-reco/vuepress-theme-reco-next",
-    docsBranch: "main",
-    docsDir: "example",
     lastUpdatedText: "",
-    // 自动设置分类
-    autoSetBlogCategories: true,
     // 自动将分类和标签添加至头部导航条
     autoAddCategoryToNavbar: {
       location: 1, // 默认 0
-      categoryText: '分类', // 默认 categories
+        categoryText: '分类', // 默认 categories
       tagText: '标签' // 默认 tags
     },
     // series 为原 sidebar
