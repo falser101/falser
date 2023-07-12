@@ -13,7 +13,7 @@ export default defineUserConfig({
     // 自动将分类和标签添加至头部导航条
     autoAddCategoryToNavbar: {
       location: 1, // 默认 0
-        categoryText: '分类', // 默认 categories
+      categoryText: '分类', // 默认 categories
       tagText: '标签' // 默认 tags
     },
     // series 为原 sidebar
