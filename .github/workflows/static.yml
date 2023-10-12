@@ -35,10 +35,16 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v3
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v2
-        with:
-          # Upload entire repository
-          path: '.'
+        env:
+          INPUT_PATH: './.vuepress/dist'
+        run: |
+          tar \
+          --dereference --hard-dereference \
+          --directory "$INPUT_PATH" \
+          -cvf "$RUNNER_TEMP/artifact.tar" \
+          --exclude=.git \
+          --exclude=.github \
+          . 
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v2
