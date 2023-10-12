@@ -4,6 +4,7 @@ import recoTheme from "vuepress-theme-reco";
 export default defineUserConfig({
   title: "falser101's blog",
   description: "falser101's blog",
+  base: "/falser/",
   theme: recoTheme({
     style: "@vuepress-reco/style-default",
     logo: "/logo.png",
