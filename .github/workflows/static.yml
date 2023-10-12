@@ -26,8 +26,6 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    env:
-      INPUT_PATH: './.vuepress/dist'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
