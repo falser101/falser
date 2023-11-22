@@ -34,7 +34,7 @@ jobs:
         uses: actions/configure-pages@v3
       - name: Tar dist
         env:
-          INPUT_PATH: './.vuepress/dist'
+          INPUT_PATH: 'src/.vuepress/dist'
         run: |
           tar \
           --dereference --hard-dereference \
@@ -42,7 +42,7 @@ jobs:
           -cvf "$RUNNER_TEMP/artifact.tar" \
           --exclude=.git \
           --exclude=.github \
-          . 
+          .
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
