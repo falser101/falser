@@ -1,7 +1,5 @@
-.vuepress/.cache
-.vuepress/.temp
-node_modules
-.idea
-falser.iml
-package-lock.json
-yarn.lock
+
+node_modules/
+src/.vuepress/.cache/
+src/.vuepress/.temp/
+
