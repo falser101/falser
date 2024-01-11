@@ -18,13 +18,18 @@ tag:
 ![pulsar-broker-startup](/imgs/pulsar/broker-startup/总体启动流程.png)
 
 1. 加载配置文件。Broker启动时会读取conf/broker.conf文件，并将其中的配置信息全部转化为Key/Value的形式，通过反射创建一个`ServiceConfigration`对象。并且把值设置到这个对象的属性中。
+
 2. 注册ShutdownHook和OOM监听器。ShutdownHook在服务关闭时执行清理💰，OOMListener在内存溢出时打印异常信息。
+
 3. 启动`BookieStatsProvider`服务,`BookieStatsProvider`是Bookie服务的统计信息提供者，提供Bookie服务的统计信息。这一步通常只在Standalone模式下执行。
+
 4. 启动BookieServer,让Bookie和Broker一起启动，主要用于开发测试
+
 5. 启动`PulsarService`服务，`PulsarService`是启动Broker的主入口，内部还会启动一个`BrokerService`，这两个Service的分工不同，`PulsarService`范围更大，包括负载管理、缓存、Schema、Admin相关的Web服务等，属于管理流。而`BrokerService`则专注于消息的收发，创建`Netty EventLoopGroup`、创建内置调度器等，属于数据流。
 
 > 什么是管理流和数据流？
-> 增删改查Broker的配置，或者一个Topic，通过PulsarAD min来操作，这些操作都是管理流。
+>
+> 增删改查Broker的配置，或者一个Topic，通过Pulsar-Admin来操作，这些操作都是管理流。
 > 收发消息，这些操作都是数据流。执行操作之前，需要通过PulsarClient来创建Producer和Consumer，然后才能执行收发消息的操作。
 
 主要代码如下：
