@@ -77,7 +77,7 @@ public void start() throws Exception {
 }
 ```
 
-## PulsarService
+## PulsarService.java
 
 主要代码如下（省略了一些不重要的代码）：
 ```java
@@ -95,6 +95,7 @@ public void start() throws PulsarServerException {
         coordinationService = new CoordinationServiceImpl(localMetadataStore);
 
         // 创建pulsarResources，用于元数据管理，元数据包括本地元数据和配置文件元数据，保存在zookeeper中
+        // 主要实现方式为调用配置中心存储对于资源的元数据
         pulsarResources = newPulsarResources();
 
         // 创建orderedExecutor线程池，后续用于ZK的操作，拆分bundle等
@@ -229,7 +230,7 @@ public void start() throws PulsarServerException {
 }
 ```
 
-## BrokerService
+## BrokerService.java
 
 ```java
 public BrokerService(PulsarService pulsar, EventLoopGroup eventLoopGroup) throws Exception {
@@ -294,4 +295,52 @@ public BrokerService(PulsarService pulsar, EventLoopGroup eventLoopGroup) throws
     this.brokerEntryMetadataInterceptors = BrokerEntryMetadataUtils
         .loadBrokerEntryMetadataInterceptors(pulsar.getConfiguration().getBrokerEntryMetadataInterceptors(),
                 BrokerService.class.getClassLoader());
+```
+
+### 动态配置
+在启动Broker Service前会遍历ServiceConfiguration类中的所有成员变量（包括私有成员变量）
+
+如果变量不是null，并且它具有FieldContext注解，那么设置其可访问性（以便在后续步骤中访问其值）
+
+如果变量具有dynamic()属性，使用new ConfigField(field)创建一个新的ConfigField对象，并且将该对象添加到dynamicConfigurationMap
+
+```java
+    private static ConcurrentOpenHashMap<String, ConfigField> prepareDynamicConfigurationMap() {
+        ConcurrentOpenHashMap<String, ConfigField> dynamicConfigurationMap =
+                ConcurrentOpenHashMap.<String, ConfigField>newBuilder().build();
+        for (Field field : ServiceConfiguration.class.getDeclaredFields()) {
+            if (field != null && field.isAnnotationPresent(FieldContext.class)) {
+                field.setAccessible(true);
+                if (field.getAnnotation(FieldContext.class).dynamic()) {
+                    dynamicConfigurationMap.put(field.getName(), new ConfigField(field));
+                }
+            }
+        }
+        return dynamicConfigurationMap;
+    }
+```
+
+然后通过下面的方法进行注册
+```java
+    public <T> void registerConfigurationListener(String configKey, Consumer<T> listener) {
+        validateConfigKey(configKey);
+        configRegisteredListeners.put(configKey, listener);
+    }
+```
+
+示例：
+```java
+    registerConfigurationListener("maxPublishRatePerTopicInMessages",
+        maxPublishRatePerTopicInMessages -> updateMaxPublishRatePerTopicInMessages()
+    );
+
+    private void updateMaxPublishRatePerTopicInMessages() {
+        this.pulsar().getExecutor().execute(() ->
+            forEachTopic(topic -> {
+                if (topic instanceof AbstractTopic) {
+                    ((AbstractTopic) topic).updateBrokerPublishRate();
+                    ((AbstractTopic) topic).updatePublishRateLimiter();
+                }
+            }));
+    }
 ```
