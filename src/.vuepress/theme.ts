@@ -66,7 +66,6 @@ export default hopeTheme({
     mdEnhance: {
       align: true,
       attrs: true,
-      card: true,
 
       // install chart.js before enabling it
       // chart: true,
